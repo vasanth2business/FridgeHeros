@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fridge Hero - Smart 3-Step Recipes from Your Leftovers</title>
+  <meta name="description" content="Generate delicious, creative recipes from 3-4 simple ingredients using Gemini AI. Clean, fast, and responsive.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="glass-bg-decor decor-1"></div>
+  <div class="glass-bg-decor decor-2"></div>
+
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo-area">
+        <svg class="app-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          <path d="M5 12h14"/>
+        </svg>
+        <h1>Fridge <span>Hero</span></h1>
+      </div>
+    </header>
+
+    <!-- Error Banner -->
+    <div id="error-banner" class="error-banner hidden" role="alert">
+      <div class="error-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="error-text">
+        <strong id="error-title">Error Title</strong>
+        <p id="error-desc">Error details go here.</p>
+      </div>
+      <button id="close-error-btn" class="close-btn" aria-label="Dismiss error">&times;</button>
+    </div>
+
+    <!-- Main Dashboard -->
+    <main class="main-dashboard">
+      
+      <!-- Input Section -->
+      <section id="input-section" class="card-panel">
+        <div class="section-intro">
+          <h2>What's in your fridge?</h2>
+          <p>Enter 3 or 4 ingredients you want to use, and let Gemini cook up a creative 3-step masterpiece!</p>
+        </div>
+
+        <form id="ingredients-form" novalidate>
+          <!-- Cuisine Selector Section -->
+          <div class="cuisine-selection-group">
+            <label for="cuisine-input">Cuisine Style <span class="optional-indicator">(Optional)</span></label>
+            <div class="input-wrapper autocomplete-wrapper">
+              <span class="cuisine-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                  <path d="M5 12h14"/>
+                </svg>
+              </span>
+              <input type="text" id="cuisine-input" class="cuisine-input" placeholder="e.g. Indian, Arabic, Italian..." autocomplete="off">
+              <button type="button" id="clear-cuisine-btn" class="clear-input-btn hidden" aria-label="Clear cuisine">&times;</button>
+              <div id="cuisine-suggestions" class="suggestions-list hidden"></div>
+            </div>
+          </div>
+
+          <div class="ingredients-grid">
+            
+            <!-- Ingredient 1 -->
+            <div class="ingredient-field">
+              <label for="ing-1">Ingredient 1 <span class="required-indicator">*</span></label>
+              <div class="input-wrapper">
+                <span class="ing-icon">1</span>
+                <input type="text" id="ing-1" class="ingredient-input" placeholder="e.g., Apple" required>
+                <button type="button" class="clear-input-btn hidden" aria-label="Clear field">&times;</button>
+              </div>
+            </div>
+
+            <!-- Ingredient 2 -->
+            <div class="ingredient-field">
+              <label for="ing-2">Ingredient 2 <span class="required-indicator">*</span></label>
+              <div class="input-wrapper">
+                <span class="ing-icon">2</span>
+                <input type="text" id="ing-2" class="ingredient-input" placeholder="e.g., Banana" required>
+                <button type="button" class="clear-input-btn hidden" aria-label="Clear field">&times;</button>
+              </div>
+            </div>
+
+            <!-- Ingredient 3 -->
+            <div class="ingredient-field">
+              <label for="ing-3">Ingredient 3 <span class="required-indicator">*</span></label>
+              <div class="input-wrapper">
+                <span class="ing-icon">3</span>
+                <input type="text" id="ing-3" class="ingredient-input" placeholder="e.g., Bread" required>
+                <button type="button" class="clear-input-btn hidden" aria-label="Clear field">&times;</button>
+              </div>
+            </div>
+
+            <!-- Ingredient 4 -->
+            <div class="ingredient-field">
+              <label for="ing-4">Ingredient 4 <span class="optional-indicator">(Optional)</span></label>
+              <div class="input-wrapper">
+                <span class="ing-icon">4</span>
+                <input type="text" id="ing-4" class="ingredient-input" placeholder="e.g., Butter">
+                <button type="button" class="clear-input-btn hidden" aria-label="Clear field">&times;</button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="validation-status" id="validation-status-text" aria-live="polite">
+            Please enter at least 3 ingredients to unlock the magic.
+          </div>
+
+          <button type="submit" id="submit-recipe-btn" class="btn btn-primary btn-lg btn-block" disabled>
+            <span class="btn-content">
+              <svg class="sparkle-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.32 11.32l.707-.707M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/>
+              </svg>
+              Create Magic Recipe
+            </span>
+          </button>
+        </form>
+      </section>
+
+      <!-- Cooking Loader (Skeleton / Animation) -->
+      <section id="loading-section" class="card-panel hidden" aria-live="assertive">
+        <div class="cooking-loader">
+          <div class="pan-wrapper">
+            <div class="pan">
+              <div class="pan-handle"></div>
+              <div class="pan-bowl">
+                <div class="food-item item-1"></div>
+                <div class="food-item item-2"></div>
+                <div class="food-item item-3"></div>
+              </div>
+            </div>
+            <div class="pan-shadow"></div>
+          </div>
+          
+          <div class="loading-messages">
+            <h3 id="loader-title">Consulting Chef Gemini...</h3>
+            <p id="loader-subtitle" class="loading-subtitle">Gathering spices and chopping ingredients</p>
+          </div>
+
+          <!-- Skeleton representation of recipe card -->
+          <div class="skeleton-card">
+            <div class="skeleton-header"></div>
+            <div class="skeleton-line line-1"></div>
+            <div class="skeleton-line line-2"></div>
+            <div class="skeleton-line line-3"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recipe Output Section -->
+      <section id="recipe-section" class="recipe-card-container hidden">
+        <article class="recipe-card">
+          <div class="recipe-badges-container">
+            <div class="recipe-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Ready in under 15 mins
+            </div>
+            <div id="recipe-cuisine-badge" class="recipe-badge cuisine-badge hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/>
+              </svg>
+              <span id="recipe-cuisine-text">Indian</span>
+            </div>
+          </div>
+          
+          <header class="recipe-header">
+            <h2 id="recipe-title">Gourmet Leftover Medley</h2>
+            <div class="recipe-ingredients-used">
+              <span>Ingredients used:</span>
+              <ul id="recipe-tags-list" class="recipe-tags">
+                <!-- dynamically filled -->
+              </ul>
+            </div>
+          </header>
+
+          <div class="recipe-body">
+            <!-- Step 1 -->
+            <div class="recipe-step">
+              <div class="step-number">1</div>
+              <div class="step-content">
+                <h3>Prep & Prime</h3>
+                <p id="recipe-step-1">Dice the ingredients finely and preheat your cooking surface.</p>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="recipe-step">
+              <div class="step-number">2</div>
+              <div class="step-content">
+                <h3>Sauté & Simmer</h3>
+                <p id="recipe-step-2">Toss everything in a hot pan with butter and cook until tender and golden brown.</p>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="recipe-step">
+              <div class="step-number">3</div>
+              <div class="step-content">
+                <h3>Plating & Presentation</h3>
+                <p id="recipe-step-3">Drizzle with seasoning, plate beautifully, and enjoy warm.</p>
+              </div>
+            </div>
+          </div>
+
+          <footer class="recipe-footer">
+            <button id="regenerate-recipe-btn" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+              </svg>
+              Surprise Me Again!
+            </button>
+            <button id="reset-recipe-btn" class="btn btn-secondary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                <path d="M21 3v5h-5"/>
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                <path d="M3 21v-5h5"/>
+              </svg>
+              Reset & Try New Ingredients
+            </button>
+          </footer>
+        </article>
+      </section>
+
+    </main>
+
+    <footer class="app-footer">
+      <p>&copy; 2026 Fridge Hero. Powered by Gemini AI. Cook responsibly.</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
