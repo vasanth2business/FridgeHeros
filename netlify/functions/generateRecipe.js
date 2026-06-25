@@ -12,16 +12,18 @@ exports.handler = async (event) => {
   };
 
   // Handle preflight requests
+  console.log("Netlify function invoked; method=", event.httpMethod);
+
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers };
   }
 
-  // Only accept POST requests
+  // Only accept POST requests (return method for easier debugging)
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
       headers,
-      body: JSON.stringify({ error: "Method not allowed" })
+      body: JSON.stringify({ error: "Method not allowed", method: event.httpMethod })
     };
   }
 
