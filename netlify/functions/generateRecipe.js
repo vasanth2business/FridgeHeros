@@ -111,9 +111,9 @@ Return this exact JSON structure:
       };
     }
 
-    // Extract recipe from Gemini response
-    const recipeText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    
+    // Extract recipe text from Gemini response
+    let recipeText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
     if (!recipeText) {
       return {
         statusCode: 500,
@@ -122,14 +122,36 @@ Return this exact JSON structure:
       };
     }
 
-    // Parse and return recipe
-    const recipe = JSON.parse(recipeText);
+    // Clean common wrappers (markdown code fences) and try to extract JSON substring
+    try {
+      // Remove fenced code blocks like ```json or ```
+      recipeText = recipeText.replace(/```(?:json)?\s*/gi, '');
+      recipeText = recipeText.replace(/\s*```\s*$/gi, '');
+      recipeText = recipeText.trim();
 
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify(recipe)
-    };
+      // If the model returned extra text, extract the first JSON object between the first '{' and the last '}'
+      const firstBrace = recipeText.indexOf('{');
+      const lastBrace = recipeText.lastIndexOf('}');
+      const jsonCandidate = (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace)
+        ? recipeText.slice(firstBrace, lastBrace + 1)
+        : recipeText;
+
+      const recipe = JSON.parse(jsonCandidate);
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(recipe)
+      };
+
+    } catch (parseError) {
+      console.error('Failed to parse recipe JSON:', parseError, 'recipeText:', recipeText);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: 'Failed to parse recipe JSON', details: parseError.message })
+      };
+    }
 
   } catch (error) {
     console.error("Error:", error);
